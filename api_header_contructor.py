@@ -54,23 +54,23 @@ class api_call_generator:
 
 generator = api_call_generator()
 
-
+#check if enough parameters have been supplied at command line
 if len(sys.argv) < 7:
     generator.print_help()
 
 
-
+#convert json formatted params to python dict object
 params = json.loads(generator.params)
 print "params: ", str(params)
 
-
+#Test URL created to make a get request
 url = generator.urlprefix + generator.host + "/" + generator.path + '?' + "results" + "=" + params['results']
 print "url", url 
 
-
+#create HMAC signature and store in the variable headers
 generator.headers = generator.sign(generator.method, generator.host, generator.path, params, generator.skey, generator.ikey)
 print "headers: ", str(generator.headers)
 
-
+#make the call using requests library, supplying the headers returned from the signing method
 r = requests.get(url, headers=generator.headers)
 print "response:", str(r)
