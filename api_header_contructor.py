@@ -51,12 +51,12 @@ class api_call_generator:
         #return {'Date': now, 'Authorization': 'Basic %s' % base64.b64encode(auth)}
 
 
-
-generator = api_call_generator()
-
 #check if enough parameters have been supplied at command line
 if len(sys.argv) < 7:
     generator.print_help()
+
+generator = api_call_generator()
+
 
 
 #convert json formatted params to python dict object
