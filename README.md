@@ -10,7 +10,7 @@ Use brew to install the pipenv.
 this should install the required dependencies.
 
 3. Run 'pipenv run main' at command prompt with the required paramaters:
-example: GET <api-hostname> <example call i.e admin/v2/logs/authentication> '{"results": "denied"}' <Ikey> <Skey>
+example: GET <api-hostname> <example call i.e admin/v2/logs/authentication> '{"results": "denied"}' Ikey Skey
 
 Note: when copying the parameters JSON it mis interprets the speak marks around the string so best to check these are correct.
 
