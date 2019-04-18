@@ -53,7 +53,7 @@ class api_call_generator:
 #check if enough parameters have been supplied at command line
 if len(sys.argv) < 7:
         print_help()
-
+        exit(1)
 generator = api_call_generator()
 
 
