@@ -1,6 +1,10 @@
 import base64, email, hmac, json, hashlib, urllib, sys, requests
 
 
+def print_help():
+    print "python api_header_contructor.py $method <GET/PUT/POST> $host <API hostname> $path <API Call> $params <parameters required by API call> $skey <Secret Key>  $ikey <Integration key>"
+
+
 class api_call_generator:
     def __init__(self):
 
@@ -12,11 +16,6 @@ class api_call_generator:
         self.ikey = sys.argv[6]
         self.headers = None
 	self.urlprefix = "https://"
-	
-
-    def print_help(self):
-            print "python api_header_contructor.py $method <GET/PUT/POST> $host <API hostname> $path <API Call> $params <parameters required by API call> $skey <Secret Key>  $ikey <Integration key>"
-
 
     def sign(self, method, host, path, params, skey, ikey):
         """
@@ -53,7 +52,7 @@ class api_call_generator:
 
 #check if enough parameters have been supplied at command line
 if len(sys.argv) < 7:
-    generator.print_help()
+        print_help()
 
 generator = api_call_generator()
 
