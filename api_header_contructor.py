@@ -2,7 +2,9 @@ import base64, email, hmac, json, hashlib, urllib, sys, requests
 
 
 def print_help():
-    print "python api_header_contructor.py $method <GET/PUT/POST> $host <API hostname> $path <API Call> $params <parameters required by API call> $skey <Secret Key>  $ikey <Integration key>"
+    print """python api_header_contructor.py $method <GET/PUT/POST> $host <API hostname> $path <API Call> $params <parameters required by API call> $skey <Secret Key>  $ikey <Integration key>
+             If no params are required enter 'no'
+    """
 
 
 class api_call_generator:
@@ -51,20 +53,37 @@ class api_call_generator:
 
 
 #check if enough parameters have been supplied at command line
-if len(sys.argv) < 7:
+
+if len(sys.argv) < 6:
         print_help()
         exit(1)
 generator = api_call_generator()
 
 
 
-#convert json formatted params to python dict object
-params = json.loads(generator.params)
-print "params: ", str(params)
+# Check if any params have been passed and convert json formatted params to python dict object
+if str(generator.params).lower() == 'no':
+    print "No parameters provided, continuing"
+else:
+    params = json.loads(generator.params)
+    print "params: ", str(params)
 
-#Test URL created to make a get request
-url = generator.urlprefix + generator.host + "/" + generator.path + '?' + "results" + "=" + params['results']
-print "url", url 
+#determine request type:
+
+if generator.method == 'GET':
+    if str(generator.params).lower() == 'no':
+        url = generator.urlprefix + generator.host + "/" + generator.path
+        print "url", url
+    else:
+        url = generator.urlprefix + generator.host + "/" + generator.path + '?' + "results" + "=" + params['results']
+        print "url", url
+
+elif generator.method == 'POST':
+    pass
+else:
+    print "invalid method"
+
+
 
 #create HMAC signature and store in the variable headers
 generator.headers = generator.sign(generator.method, generator.host, generator.path, params, generator.skey, generator.ikey)
