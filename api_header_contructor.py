@@ -17,7 +17,7 @@ class api_call_generator:
         self.skey = sys.argv[5]
         self.ikey = sys.argv[6]
         self.headers = None
-	self.urlprefix = "https://"
+        self.urlprefix = "https://"
 
     def sign(self, method, host, path, params, skey, ikey):
         """
@@ -37,39 +37,37 @@ class api_call_generator:
             if isinstance(val, unicode):
                 val = val.encode("utf-8")
                 args.append(
-                '%s=%s' % (urllib.quote(key, '~'), urllib.quote(val, '~')))
+                    '%s=%s' % (urllib.quote(key, '~'), urllib.quote(val, '~')))
         canon.append('&'.join(args))
         canon = '\n'.join(canon)
 
         # sign canonical string
         sig = hmac.new(skey, canon, hashlib.sha1)
         auth = '%s:%s' % (ikey, sig.hexdigest())
-	authorization = 'Basic %s' % base64.b64encode(auth)
-	date = now
-	headers = {'Date':date, 'Authorization':authorization}
+        authorization = 'Basic %s' % base64.b64encode(auth)
+        date = now
+        headers = {'Date': date, 'Authorization': authorization}
 
         return headers
-        #return {'Date': now, 'Authorization': 'Basic %s' % base64.b64encode(auth)}
+        # return {'Date': now, 'Authorization': 'Basic %s' % base64.b64encode(auth)}
 
 
-#check if enough parameters have been supplied at command line
+# check if enough parameters have been supplied at command line
 
 if len(sys.argv) < 6:
-        print_help()
-        exit(1)
+    print_help()
+    exit(1)
 generator = api_call_generator()
-
-
 
 # Check if any params have been passed and convert json formatted params to python dict object
 if str(generator.params).lower() == 'no':
     print "No parameters provided, continuing"
+    params = {}
 else:
     params = json.loads(generator.params)
     print "params: ", str(params)
 
-#determine request type:
-
+# determine request type:
 if generator.method == 'GET':
     if str(generator.params).lower() == 'no':
         url = generator.urlprefix + generator.host + "/" + generator.path
@@ -77,18 +75,16 @@ if generator.method == 'GET':
     else:
         url = generator.urlprefix + generator.host + "/" + generator.path + '?' + "results" + "=" + params['results']
         print "url", url
-
 elif generator.method == 'POST':
     pass
 else:
     print "invalid method"
 
-
-
-#create HMAC signature and store in the variable headers
-generator.headers = generator.sign(generator.method, generator.host, generator.path, params, generator.skey, generator.ikey)
+# create HMAC signature and store in the variable headers
+generator.headers = generator.sign(generator.method, generator.host, generator.path, params, generator.skey,
+                                   generator.ikey)
 print "headers: ", str(generator.headers)
 
-#make the call using requests library, supplying the headers returned from the signing method
+# make the call using requests library, supplying the headers returned from the signing method
 r = requests.get(url, headers=generator.headers)
 print "response:", str(r)
