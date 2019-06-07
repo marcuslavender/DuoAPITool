@@ -1,4 +1,4 @@
-import base64, email, hmac, json, hashlib, urllib, sys, requests
+import base64, email, hmac, json, hashlib, urllib, sys, requests, ast, httplib
 
 
 def print_help():
@@ -8,14 +8,14 @@ def print_help():
 
 
 class api_call_generator:
-    def __init__(self):
+    def __init__(self,method,host,path,params,ikey,skey):
 
-        self.method = sys.argv[1]
-        self.host = sys.argv[2]
-        self.path = sys.argv[3]
-        self.params = sys.argv[4]
-        self.skey = sys.argv[5]
-        self.ikey = sys.argv[6]
+        self.method = method
+        self.host = host
+        self.path = path
+        self.params = params
+        self.ikey = ikey
+        self.skey = skey
         self.headers = None
         self.urlprefix = "https://"
 
@@ -29,11 +29,13 @@ class api_call_generator:
         """
 
         # create canonical string
-        now = email.Utils.formatdate()
+        #now = email.Utils.formatdate()
+        now = 'Mon, 20 May 2019 17:49:45 -0000'
         canon = [now, method.upper(), host.lower(), path]
         args = []
         for key in sorted(params.keys()):
             val = params[key]
+            val = unicode(val,"utf-8")
             if isinstance(val, unicode):
                 val = val.encode("utf-8")
                 args.append(
@@ -46,10 +48,11 @@ class api_call_generator:
         auth = '%s:%s' % (ikey, sig.hexdigest())
         authorization = 'Basic %s' % base64.b64encode(auth)
         date = now
+        #date = 'Mon, 20 May 2019 17:49:45 -0000'
         headers = {'Date': date, 'Authorization': authorization}
-
-        return headers
-        # return {'Date': now, 'Authorization': 'Basic %s' % base64.b64encode(auth)}
+        print headers
+        #return headers
+        return {'Date': now, 'Authorization': 'Basic %s' % base64.b64encode(auth)}
 
 
 # check if enough parameters have been supplied at command line
@@ -57,14 +60,19 @@ class api_call_generator:
 if len(sys.argv) < 6:
     print_help()
     exit(1)
-generator = api_call_generator()
+
+
+
+generator = api_call_generator(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
+
 
 # Check if any params have been passed and convert json formatted params to python dict object
 if str(generator.params).lower() == 'no':
     print "No parameters provided, continuing"
     params = {}
 else:
-    params = json.loads(generator.params)
+    params = json.dumps(json.loads(generator.params))
+    params = ast.literal_eval(params)
     print "params: ", str(params)
 
 # determine request type:
@@ -84,7 +92,11 @@ else:
 generator.headers = generator.sign(generator.method, generator.host, generator.path, params, generator.skey,
                                    generator.ikey)
 print "headers: ", str(generator.headers)
-
+print ""
+print ""
 # make the call using requests library, supplying the headers returned from the signing method
-r = requests.get(url, headers=generator.headers)
+httplib.HTTPConnection.debuglevel = 1
+r = requests.get(url, headers=(generator.headers))
 print "response:", str(r)
+print ""
+print r.status_code, r.headers, r.encoding, r.json(),
